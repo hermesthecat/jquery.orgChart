@@ -5,7 +5,7 @@
     }
 
     $.fn.orgChart.defaults = {
-        data: [{id:1, name:'Root', parent: 0}],
+        data: [{id:1, fullname:'Root', manager_id: 0}],
         showControls: false,
         allowEdit: false,
         onAddNode: null,
@@ -40,7 +40,7 @@
 
             // add "add button" listener
             $container.find('.org-add-button').click(function(e){
-                var thisId = $(this).parent().attr('node-id');
+                var thisId = $(this).().attr('node-id');
 
                 if(self.opts.onAddNode !== null){
                     self.opts.onAddNode(nodes[thisId]);
@@ -65,10 +65,10 @@
         }
 
         this.startEdit = function(id){
-            var inputElement = $('<input class="org-input" type="text" value="'+nodes[id].data.name+'"/>');
+            var inputElement = $('<input class="org-input" type="text" value="'+nodes[id].data.fullname+'"/>');
             $container.find('div[node-id='+id+'] h2').replaceWith(inputElement);
             var commitChange = function(){
-                var h2Element = $('<h2>'+nodes[id].data.name+'</h2>');
+                var h2Element = $('<h2>'+nodes[id].data.fullname+'</h2>');
                 if(opts.allowEdit){
                     h2Element.click(function(){
                         self.startEdit(id);
@@ -96,13 +96,13 @@
                 nextId++;
             }
 
-            self.addNode({id: nextId, name: '', parent: parentId});
+            self.addNode({id: nextId, name: '', manager_id: parentId});
         }
 
         this.addNode = function(data){
             var newNode = new Node(data);
             nodes[data.id] = newNode;
-            nodes[data.parent].addChild(newNode);
+            nodes[data.manager_id].addChild(newNode);
 
             self.draw();
             self.startEdit(data.id);
@@ -112,7 +112,7 @@
             for(var i=0;i<nodes[id].children.length;i++){
                 self.deleteNode(nodes[id].children[i].data.id);
             }
-            nodes[nodes[id].data.parent].removeChild(id);
+            nodes[nodes[id].data.manager_id].removeChild(id);
             delete nodes[id];
             self.draw();
         }
@@ -133,11 +133,11 @@
 
         // generate parent child tree
         for(var i in nodes){
-            if(nodes[i].data.parent == 0){
+            if(nodes[i].data.manager_id == 0){
                 rootNodes.push(nodes[i]);
             }
             else{
-                nodes[nodes[i].data.parent].addChild(nodes[i]);
+                nodes[nodes[i].data.manager_id].addChild(nodes[i]);
             }
         }
 
@@ -213,8 +213,8 @@
         this.formatNode = function(opts){
             var nameString = '',
                 descString = '';
-            if(typeof data.name !== 'undefined'){
-                nameString = '<h2>'+self.data.name+'</h2>';
+            if(typeof data.fullname !== 'undefined'){
+                nameString = '<h2>'+self.data.fullname+'</h2>';
             }
             if(typeof data.description !== 'undefined'){
                 descString = '<p>'+self.data.description+'</p>';
